@@ -1,34 +1,33 @@
 package fibServer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class fibClient {
 	public static void main(String[] args) {
-		System.out.println("Enter a Numer to fibonaccionize: ");
-		final Scanner scanner = new Scanner(System.in);
-		final int x = scanner.nextInt();
-		try {
+		final String instruction = "--- Enter a number to fibonaccionize: ";
+        System.out.println(instruction);
+        try {
 			final Socket client = new Socket(InetAddress.getLocalHost(), 1432);
-			final InputStream in = client.getInputStream();
-			final Scanner scanner2 = new Scanner(in);
-			
-			final OutputStream out = client.getOutputStream();
+            final PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+            final BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            final BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
 
-			final PrintStream outWriter = new PrintStream(out);
-			outWriter.println(x+" ");
+            String input;
+            while((input = consoleInput.readLine()) != null){
+                try {
+                    final int number = Integer.parseInt(input);
+                    out.println(number);
+                    System.out.println(number + ". number in Fibonacci's sequence:\t\t" + in.readLine());
+                    System.out.println(instruction);
+                } catch(Exception e){
+                    System.err.println("Please enter a valid number: ");
+                }
+            }
 
-			final int result = scanner2.nextInt();
-			System.out.printf("Fibonacci number of %s is %s \n", x, result);
 		} catch (IOException e) {
-			e.printStackTrace();
-		}finally{
-			scanner.close();
-		}
+            e.printStackTrace();
+        }
 	}
 }
