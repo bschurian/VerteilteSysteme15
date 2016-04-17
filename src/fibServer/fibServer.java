@@ -1,26 +1,31 @@
 package fibServer;
 
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 public class fibServer {
 
 	public static void main(String[] args) {
 		try {
-			final ServerSocket serverSeS = new ServerSocket(1432);
-			final Socket server = serverSeS.accept();
+			final ServerSocket server = new ServerSocket(1432);
+			final Socket clientSocket = server.accept();
 
-			final Scanner scannerIn = new Scanner(server.getInputStream());
-			final int x = scannerIn.nextInt();
-			
-			final int fib= fibonacci(x);
-			
-			final PrintStream pS = new PrintStream(server.getOutputStream());
-			pS.println(fib);
+            final PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+            final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+            String userInput;
+            while((userInput = in.readLine()) != null){
+                try {
+                    final int number = Integer.parseInt(userInput);
+                    final int result = fibonacci(number);
+                    out.println(result);
+                } catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -29,7 +34,8 @@ public class fibServer {
 	}
 
 	public static int fibonacci(final int n) {
-		if (n <= 2)return 1;
+        if(n < 1) return 0;
+        if (n <= 2)return 1;
 		return fibonacci(n - 1) + fibonacci(n - 2);
 	}
 }
