@@ -10,7 +10,13 @@ public class fibServer {
 
 	public static void main(String[] args) {
 		try {
-			final ServerSocket server = new ServerSocket(5678);
+            int port;
+            try{
+                port = Integer.parseInt(args[1]);
+            } catch(Exception e){
+                port = 5678;
+            }
+			final ServerSocket server = new ServerSocket(port);
 			final Socket clientSocket = server.accept();
 
 			final PrintWriter out = new PrintWriter(
@@ -25,11 +31,11 @@ public class fibServer {
 					try{
 						final int number = Integer.parseInt(userInput);
 						result = fibonacci(number);
-					}catch (IllegalArgumentException iaE){
-						result = - 2;
-					}catch(InputMismatchException ime){
+					}catch(NumberFormatException nfe){
 						result = -1;
-					}
+					}catch (IllegalArgumentException iaE){
+                        result = - 2;
+                    }
 					out.println(result);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -54,3 +60,6 @@ public class fibServer {
 		return fibonacci(x - 1) + fibonacci(x - 2);
 	}
 }
+
+
+
