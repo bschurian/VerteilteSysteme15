@@ -9,7 +9,13 @@ public class fibClient {
 		final String instruction = "--- Enter a number to fibonaccionize: ";
         System.out.println(instruction);
         try {
-			final Socket client = new Socket(InetAddress.getLocalHost(), 1432);
+			final Socket client ;
+			InetAddress address = InetAddress.getByAddress(args[0].getBytes());
+			int port = -1;
+			port = Integer.parseInt(args[1]);
+			if(address != null)address = InetAddress.getLocalHost();
+			if(port==-1)port = 5678;
+			client = new Socket(address, 5678);
             final PrintWriter out = new PrintWriter(client.getOutputStream(), true);
             final BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             final BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
@@ -17,16 +23,12 @@ public class fibClient {
             String input;
             while((input = consoleInput.readLine()) != null){
                 try {
-                    out.println(input);
-                    String line = in.readLine();
-                    if(line == null){
-                        System.out.println("Connection already closed");
-                        break;
-                    }
-                    System.out.println(line);
+                    final int number = Integer.parseInt(input);
+                    out.println(number);
+                    System.out.println(number + ". number in Fibonacci's sequence:\t\t" + in.readLine());
                     System.out.println(instruction);
-                }  catch(IOException e){
-                    System.err.println(e.getMessage());
+                } catch(IOException e){
+                    System.err.println("Please enter a valid number: ");
                 }
             }
 
