@@ -12,17 +12,21 @@ public class fibServer {
 			final ServerSocket server = new ServerSocket(1432);
 			final Socket clientSocket = server.accept();
 
-            final PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            while(!clientSocket.isClosed()) {
+                final PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                final BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            String userInput;
-            while((userInput = in.readLine()) != null){
-                try {
-                    final int number = Integer.parseInt(userInput);
-                    final int result = fibonacci(number);
-                    out.println(result);
-                } catch(Exception e){
-                    e.printStackTrace();
+
+                String userInput;
+                if ((userInput = in.readLine()) != null) {
+                    try {
+                        final int number = Integer.parseInt(userInput);
+                        final int result = fibonacci(number);
+                        out.println(number + ". number in Fibonacci's sequence: " + result);
+                    } catch (NumberFormatException e) {
+                        out.println(userInput + " is not accepted");
+                        clientSocket.close();
+                    }
                 }
             }
 

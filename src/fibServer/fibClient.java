@@ -17,12 +17,16 @@ public class fibClient {
             String input;
             while((input = consoleInput.readLine()) != null){
                 try {
-                    final int number = Integer.parseInt(input);
-                    out.println(number);
-                    System.out.println(number + ". number in Fibonacci's sequence:\t\t" + in.readLine());
+                    out.println(input);
+                    String line = in.readLine();
+                    if(line == null){
+                        System.out.println("Connection already closed");
+                        break;
+                    }
+                    System.out.println(line);
                     System.out.println(instruction);
-                } catch(Exception e){
-                    System.err.println("Please enter a valid number: ");
+                }  catch(IOException e){
+                    System.err.println(e.getMessage());
                 }
             }
 
