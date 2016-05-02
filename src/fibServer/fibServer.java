@@ -8,13 +8,18 @@ import java.util.InputMismatchException;
 
 public class fibServer {
 
+	public static final int PORTNUMBER = 5678;
+	public static final int FEHLER_ZAHLENBEREICH = -2;
+	public static final int FEHLER_EINGABE = -1;
+
 	public static void main(String[] args) {
 		try {
             int port;
             try{
-                port = Integer.parseInt(args[1]);
+                port = Integer.parseInt(args[0]);
+				if(port <= 0) throw new NumberFormatException("Port number < 0");
             } catch(Exception e){
-                port = 5678;
+                port =  PORTNUMBER;
             }
 			final ServerSocket server = new ServerSocket(port);
 			final Socket clientSocket = server.accept();
@@ -32,9 +37,9 @@ public class fibServer {
 						final int number = Integer.parseInt(userInput);
 						result = fibonacci(number);
 					}catch(NumberFormatException nfe){
-						result = -1;
+						result = FEHLER_EINGABE;
 					}catch (IllegalArgumentException iaE){
-                        result = - 2;
+                        result = FEHLER_ZAHLENBEREICH;
                     }
 					out.println(result);
 				} catch (Exception e) {
