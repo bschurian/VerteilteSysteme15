@@ -7,6 +7,9 @@ import java.util.Scanner;
 
 public class fibClient {
 
+    public static final int PORTNUMBER = 5678;
+    public static final int FEHLER_EINGABE = -1;
+    public static final int FEHLER_ZAHLENBEREICH = -2;
     public static String help = String.format("mögliche Befehle: \nhilfe - Bedienungshilfe wird ausgegeben \n" +
             "berechne <zahl> - berechnet fibonacci für <zahl> \n" +
             "ende - beendet die Anwendung");
@@ -18,8 +21,9 @@ public class fibClient {
             int port;
             try{
                 port = Integer.parseInt(args[1]);
+                if(port < 0) throw new NumberFormatException("Port < 0");
             } catch(Exception e){
-                port = 5678;
+                port = PORTNUMBER;
             }
 
             InetAddress address;
@@ -56,8 +60,8 @@ public class fibClient {
                         int response = Integer.parseInt(in.readLine());
 
                         switch(response){
-                            case -1: feedback = "Fehlerhafte Eingabe"; break;
-                            case -2: feedback = "Ungültiger Zahlenbereich"; break;
+                            case FEHLER_EINGABE: feedback = "Fehlerhafte Eingabe"; break;
+                            case FEHLER_ZAHLENBEREICH: feedback = "Ungültiger Zahlenbereich"; break;
                             default: feedback = maybeNumber + ". number in Fibonacci's sequence:" + response;
                         }
                         System.out.println(feedback); break;
