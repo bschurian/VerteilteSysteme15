@@ -37,26 +37,28 @@ public class PinnwandIpml implements Pinnwand {
 
 	@Override
 	public int getMessageCount() throws RemoteException {
-		cullExpiredMessages();
+//		cullExpiredMessages();
 		return messages.size();
 	}
 
 	@Override
 	public String[] getMessages() throws RemoteException {
-		cullExpiredMessages();
+//		cullExpiredMessages();
 		return (String[]) messages.toArray();
 	}
 
 	@Override
 	public String getMessage(int index) throws RemoteException {
-		cullExpiredMessages();
-		return messages.get(index).getMessage();
+//		cullExpiredMessages();
+		System.out.println("---" + messages.size());
+		Message msg = messages.get(index);
+		return msg.getMessage();
 	}
 
 	@Override
 	public boolean putMessage(String msg) throws RemoteException {
 		final boolean success;
-		cullExpiredMessages();
+//		cullExpiredMessages();
 		if(messages.size() >= maxNumMessages) throw new IndexOutOfBoundsException();
 		if(msg.length() > maxLengthMessage) throw new IllegalArgumentException();
 		success = messages.add(new Message(msg));
@@ -65,11 +67,13 @@ public class PinnwandIpml implements Pinnwand {
 
 	private void cullExpiredMessages(){
 		long current = System.currentTimeMillis();
+		ArrayList<Message> oldMessages = new ArrayList<>();
 		messages.forEach((message) -> {
 			if(message.getCreationTime() + messageLifetime > current){
-				messages.remove(message);
+				oldMessages.add(message);
 			}
 		});
+		messages.removeAll(oldMessages);
 	}
 
 	private class Message{
