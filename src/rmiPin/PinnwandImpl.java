@@ -1,32 +1,43 @@
 package rmiPin;
 
+import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
 import java.util.List;
 
-public class PinnwandIpml implements Pinnwand {
+public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
+	
+	public static String serviceName = "pinnwandImpl-server";
 	
 	final List<Message> messages;
-	final String PASSWORD = "password1234";
 	final int maxNumMessages;
 	/*
 	 * life time of a message in seconds
 	 */
 	final long messageLifetime;
 	final int maxLengthMessage;
-	final String nameOfService;
 	
+	final static String password = "1234";
+	final Collection<String> users;//TODO richtig
 	
-	public PinnwandIpml(int maxNumMessages,
-			long messageLifetime, int maxLengthMessage, String nameOfService) {
+	public PinnwandImpl() throws RemoteException{
+		this(20, 10, 160, "Pinnwand");
+	}
+	
+	public PinnwandImpl(int maxNumMessages,
+			long messageLifetime, int maxLengthMessage, String serviceName) throws RemoteException {
 		super();
 		this.messages = new ArrayList<Message>();
 		
 		this.maxNumMessages = maxNumMessages;
 		this.messageLifetime = messageLifetime;
 		this.maxLengthMessage = maxLengthMessage;
-		this.nameOfService = nameOfService;
+		this.serviceName = serviceName;
+		this.users = new ArrayList<String>();
 	}
 
 	@Override
@@ -50,7 +61,6 @@ public class PinnwandIpml implements Pinnwand {
 	@Override
 	public String getMessage(int index) throws RemoteException {
 //		cullExpiredMessages();
-		System.out.println("---" + messages.size());
 		Message msg = messages.get(index);
 		return msg.getMessage();
 	}
@@ -77,24 +87,47 @@ public class PinnwandIpml implements Pinnwand {
 	}
 
 	private class Message{
-
 		private long creationTime;
 		private String message;
-
 		Message(String message){
 			creationTime = System.currentTimeMillis();
 			this.message = message;
 		}
-
 		public String getMessage() {
 			return message;
 		}
-
 		public long getCreationTime() {
 			return creationTime;
 		}
 	}
+	public static void main(String args[]) {		 
 
+		Registry registry;
+		
+		Pinnwand timeServer;
+
+		if (System.getSecurityManager() == null) {
+			System.setSecurityManager(new SecurityManager());
+		}
+		
+		try {
+			if (args.length  > 0)
+				registry = LocateRegistry.getRegistry(args[0]);
+			else 
+				registry = LocateRegistry.getRegistry("localhost");
+
+			timeServer = new PinnwandImpl();
+			
+			registry.bind(serviceName, timeServer);
+
+			System.out.println("Time Server started. Ready ...");
+			
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (AlreadyBoundException e) {
+			e.printStackTrace();
+		}
+	}
 }
 
 
