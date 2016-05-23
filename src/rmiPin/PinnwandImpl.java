@@ -5,14 +5,19 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.Policy;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 	
-	public static String serviceName = "pinnwandImpl-server";
-	
+	public static String serviceName = "Pinnwand";
+
+	private static final long serialVersionUID = 1L;
+
+
 	final List<Message> messages;
 	final int maxNumMessages;
 	/*
@@ -36,7 +41,7 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		this.maxNumMessages = maxNumMessages;
 		this.messageLifetime = messageLifetime;
 		this.maxLengthMessage = maxLengthMessage;
-		this.serviceName = serviceName;
+//		this.serviceName = serviceName;
 		this.users = new ArrayList<String>();
 	}
 
@@ -104,23 +109,28 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 
 		Registry registry;
 		
-		Pinnwand timeServer;
+		Pinnwand pinnwand;
 
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new SecurityManager());
 		}
-		
+
+
+
 		try {
-			if (args.length  > 0)
-				registry = LocateRegistry.getRegistry(args[0]);
-			else 
-				registry = LocateRegistry.getRegistry("localhost");
+//			if (args.length  > 0)
+//				registry = LocateRegistry.getRegistry(args[0]);
+//			else
+//				registry = LocateRegistry.getRegistry("localhost");
 
-			timeServer = new PinnwandImpl();
+			registry = LocateRegistry.createRegistry(1099);
+
+
+			pinnwand = new PinnwandImpl();
 			
-			registry.bind(serviceName, timeServer);
+			registry.bind(serviceName, pinnwand);
 
-			System.out.println("Time Server started. Ready ...");
+			System.out.println("Pinnwand Server started. Ready ...");
 			
 		} catch (RemoteException e) {
 			e.printStackTrace();

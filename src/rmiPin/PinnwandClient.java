@@ -10,7 +10,7 @@ import java.rmi.registry.Registry;
 
 public class PinnwandClient {
 
-	public static String serviceName = "pinnwand";
+	public static String serviceName = "Pinnwand";
 
 	public static void main(String[] args) {
 
@@ -19,9 +19,11 @@ public class PinnwandClient {
 		Pinnwand pinnwand;
 
 		try{
-			registry = LocateRegistry.getRegistry("localhost");
 
-			pinnwand = 	(PinnwandImpl) registry.lookup(serviceName);
+			registry = LocateRegistry.getRegistry(1099);
+//			registry = LocateRegistry.createRegistry(1099);
+
+			pinnwand = 	(Pinnwand) registry.lookup(serviceName);
 
 			pinnwand.putMessage("My first message");
 			pinnwand.putMessage("My second message!!");
@@ -33,7 +35,7 @@ public class PinnwandClient {
 
 
 		try{
-			pinnwand = (PinnwandImpl) Naming.lookup("rmi://localhost/pinnwand");
+			pinnwand = (Pinnwand) Naming.lookup("rmi://localhost/Pinnwand");
 		} catch(RemoteException | NotBoundException | MalformedURLException e){
 			e.printStackTrace();
 		}
