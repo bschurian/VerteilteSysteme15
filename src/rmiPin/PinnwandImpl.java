@@ -9,14 +9,14 @@ import java.security.Policy;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
-	
+
 	public static String serviceName = "Pinnwand";
 
 	private static final long serialVersionUID = 1L;
-
 
 	final List<Message> messages;
 	final int maxNumMessages;
@@ -25,42 +25,43 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 	 */
 	final long messageLifetime;
 	final int maxLengthMessage;
-	
+
 	final static String password = "1234";
-	final Collection<String> users;//TODO richtig
-	
+	final Collection<String> users;// TODO richtig
+
 	final Thread messageCuller;
-	
-	public PinnwandImpl() throws RemoteException{
+
+	public PinnwandImpl() throws RemoteException {
 		this(20, 10, 600, "Pinnwand");
 	}
-	
-	public PinnwandImpl(int maxNumMessages,
-			long messageLifetime, int maxLengthMessage, String serviceName) throws RemoteException {
+
+	public PinnwandImpl(int maxNumMessages, long messageLifetime,
+			int maxLengthMessage, String serviceName) throws RemoteException {
 		super();
 		this.messages = new ArrayList<Message>();
-		
+
 		this.maxNumMessages = maxNumMessages;
 		this.messageLifetime = messageLifetime;
 		this.maxLengthMessage = maxLengthMessage;
-//		this.serviceName = serviceName;
-		this.users = new ArrayList<String>();//TODO richtig
-		
-		this.messageCuller = new Thread(new Runnable() {			
+		// this.serviceName = serviceName;
+		this.users = new ArrayList<String>();// TODO richtig
+
+		this.messageCuller = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				int maxIndex = messages.size()-1;
-				for(int i = maxIndex; i > 0; i--){
+				int maxIndex = messages.size() - 1;
+				for (int i = maxIndex; i > 0; i--) {
 					Message message = messages.get(i);
-					if(System.currentTimeMillis() < message.getCreationTime() + messageLifetime * 1000){
+					if (System.currentTimeMillis() < message.getCreationTime()
+							+ messageLifetime * 1000) {
 						messages.remove(i);
 					}
 				}
-//				try {
-//					this.wait(1000);
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
+				// try {
+				// this.wait(1000);
+				// } catch (InterruptedException e) {
+				// e.printStackTrace();
+				// }
 			}
 		});
 	}
@@ -73,19 +74,18 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 
 	@Override
 	public int getMessageCount() throws RemoteException {
-//		cullExpiredMessages();
 		return messages.size();
 	}
 
 	@Override
 	public String[] getMessages() throws RemoteException {
-//		cullExpiredMessages();
-		return (String[]) messages.toArray();
+		final String[] strings = new String[messages.size()];
+		for(int i= 0; i< messages.size(); i++) strings[i]= messages.get(i).message; 
+		return strings;
 	}
 
 	@Override
 	public String getMessage(int index) throws RemoteException {
-//		cullExpiredMessages();
 		Message msg = messages.get(index);
 		return msg.getMessage();
 	}
@@ -93,32 +93,36 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 	@Override
 	public boolean putMessage(String msg) throws RemoteException {
 		final boolean success;
-//		cullExpiredMessages();
-		if(messages.size() >= maxNumMessages) throw new IndexOutOfBoundsException();
-		if(msg.length() > maxLengthMessage) throw new IllegalArgumentException();
+		if (messages.size() >= maxNumMessages)
+			throw new IndexOutOfBoundsException();
+		if (msg.length() > maxLengthMessage)
+			throw new IllegalArgumentException();
 		success = messages.add(new Message(msg));
 		return success;
 	}
 
-	private class Message{
+	private class Message {
 		private long creationTime;
 		private String message;
-		Message(String message){
+
+		Message(String message) {
 			creationTime = System.currentTimeMillis();
 			this.message = message;
 		}
+
 		public String getMessage() {
 			return message;
 		}
+
 		public long getCreationTime() {
 			return creationTime;
 		}
 	}
 
-	public static void main(String args[]) {		 
+	public static void main(String args[]) {
 
 		Registry registry;
-		
+
 		Pinnwand pinnwand;
 
 		if (System.getSecurityManager() == null) {
@@ -126,22 +130,21 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		}
 
 		try {
-//			if (args.length  > 0)
-//				registry = LocateRegistry.getRegistry(args[0]);
-//			else
-//				registry = LocateRegistry.getRegistry("localhost");
+			// if (args.length > 0)
+			// registry = LocateRegistry.getRegistry(args[0]);
+			// else
+			// registry = LocateRegistry.getRegistry("localhost");
 
 			registry = LocateRegistry.createRegistry(1099);
 
-
 			pinnwand = new PinnwandImpl();
-			
+
 			registry.bind(serviceName, pinnwand);
 
 			System.out.println("Pinnwand Server started. Ready ...");
 			
-//			((PinnwandImpl)pinnwand).messageCuller.start();
-			
+			// ((PinnwandImpl)pinnwand).messageCuller.start();
+
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (AlreadyBoundException e) {
@@ -149,5 +152,3 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		}
 	}
 }
-
-
