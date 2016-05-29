@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="vertSysteme" default="rmiPin" basedir="." >
+ <target name="rmiPin">
+  <rmic base="." sourcebase="." includes="PinnwandImpl.class" />
+ </target>
+</project>
