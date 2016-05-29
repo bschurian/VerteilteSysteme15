@@ -21,10 +21,14 @@ public class PinnwandClient {
 		try{
 
 			registry = LocateRegistry.getRegistry(1099);
-//			registry = LocateRegistry.createRegistry(1099);
 
 			pinnwand = 	(Pinnwand) registry.lookup(serviceName);
 
+//			try{
+//				pinnwand = (Pinnwand) Naming.lookup("rmi://localhost/Pinnwand");
+//			} catch(RemoteException | NotBoundException | MalformedURLException e){
+//				e.printStackTrace();
+//			}
 			pinnwand.putMessage("My first message");
 			pinnwand.putMessage("My second message!!");
 			System.out.println(pinnwand.getMessageCount());
@@ -32,17 +36,5 @@ public class PinnwandClient {
 		} catch(RemoteException | NotBoundException e){
 			e.printStackTrace();
 		}
-
-
-		try{
-			pinnwand = (Pinnwand) Naming.lookup("rmi://localhost/Pinnwand");
-		} catch(RemoteException | NotBoundException | MalformedURLException e){
-			e.printStackTrace();
-		}
-
-
-
-
 	}
-
 }

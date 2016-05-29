@@ -6,9 +6,7 @@ import java.security.Permission;
 
 import javax.security.auth.AuthPermission;
 
-public interface Pinnwand extends Remote {
-	final AuthPermission permissionToRMI = new AuthPermission("callRMIMethods");
-	
+public interface Pinnwand extends Remote {	
 	public int login (String password) throws RemoteException;
 	public int getMessageCount() throws RemoteException;
 	public String[] getMessages() throws RemoteException;

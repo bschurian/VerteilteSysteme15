@@ -29,8 +29,10 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 	final static String password = "1234";
 	final Collection<String> users;//TODO richtig
 	
+	final Thread messageCuller;
+	
 	public PinnwandImpl() throws RemoteException{
-		this(20, 10, 160, "Pinnwand");
+		this(20, 10, 600, "Pinnwand");
 	}
 	
 	public PinnwandImpl(int maxNumMessages,
@@ -42,7 +44,25 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		this.messageLifetime = messageLifetime;
 		this.maxLengthMessage = maxLengthMessage;
 //		this.serviceName = serviceName;
-		this.users = new ArrayList<String>();
+		this.users = new ArrayList<String>();//TODO richtig
+		
+		this.messageCuller = new Thread(new Runnable() {			
+			@Override
+			public void run() {
+				int maxIndex = messages.size()-1;
+				for(int i = maxIndex; i > 0; i--){
+					Message message = messages.get(i);
+					if(System.currentTimeMillis() < message.getCreationTime() + messageLifetime * 1000){
+						messages.remove(i);
+					}
+				}
+//				try {
+//					this.wait(1000);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+			}
+		});
 	}
 
 	@Override
@@ -80,17 +100,6 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		return success;
 	}
 
-	private void cullExpiredMessages(){
-		long current = System.currentTimeMillis();
-		ArrayList<Message> oldMessages = new ArrayList<>();
-		messages.forEach((message) -> {
-			if(message.getCreationTime() + messageLifetime > current){
-				oldMessages.add(message);
-			}
-		});
-		messages.removeAll(oldMessages);
-	}
-
 	private class Message{
 		private long creationTime;
 		private String message;
@@ -105,6 +114,7 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 			return creationTime;
 		}
 	}
+
 	public static void main(String args[]) {		 
 
 		Registry registry;
@@ -114,8 +124,6 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new SecurityManager());
 		}
-
-
 
 		try {
 //			if (args.length  > 0)
@@ -131,6 +139,8 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 			registry.bind(serviceName, pinnwand);
 
 			System.out.println("Pinnwand Server started. Ready ...");
+			
+//			((PinnwandImpl)pinnwand).messageCuller.start();
 			
 		} catch (RemoteException e) {
 			e.printStackTrace();
