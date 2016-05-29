@@ -63,7 +63,7 @@ public class PinnwandClient {
 						System.out.println(pinnwand.getMessage(Integer.parseInt(input.split(" ")[1])));
 						break;
 					case "putMessage":
-						System.out.println(pinnwand.putMessage(input.trim().substring(11)));
+						System.out.println(pinnwand.putMessage(input.substring(10).trim()));
 						break;
 					case "ende":
 						System.out.println("Closing client");
