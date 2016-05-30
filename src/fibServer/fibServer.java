@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.InputMismatchException;
 
-public class fibServer {
+public class FibServer {
 
 	public static final int PORTNUMBER = 5678;
 	public static final int FEHLER_ZAHLENBEREICH = -2;

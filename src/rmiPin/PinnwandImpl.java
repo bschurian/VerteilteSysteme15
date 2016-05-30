@@ -82,7 +82,7 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 			}
 			if(userPassword.equals(PASSWORD)){
 				this.users.add(new User(this.getClientHost(), this.userTimeout));
-				curlUsers();
+				cullUsers();
 			} else {
 				throw new IllegalArgumentException("Sie haben ein falsches Passwort eingegeben.");
 			}
@@ -94,7 +94,7 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		return 1;
 	}
 
-	private void curlUsers(){
+	private void cullUsers(){
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -194,7 +194,7 @@ public class PinnwandImpl extends UnicastRemoteObject implements Pinnwand {
 		if (messages.size() <= maxNumMessages) {
 			success = messages.add(new Message(msg));
 		} else {
-			throw new IllegalArgumentException("-------shit------ " + messages.size() + " --- " + maxNumMessages);
+			throw new IllegalArgumentException("Zu viele Nachrichten!");
 		}
 		return success;
 	}

@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class fibClient {
+public class FibClient {
 
 	public static final int PORTNUMBER = 5678;
 	public static final int FEHLER_EINGABE = -1;
