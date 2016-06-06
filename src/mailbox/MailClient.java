@@ -6,6 +6,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+
+import com.google.gson.Gson;
 
 
 public class MailClient {
@@ -15,7 +22,15 @@ public class MailClient {
 	public static final int FEHLER_ZAHLENBEREICH = -2;
 	public static String help = String
 			.format("moegliche Befehle: \nhilfe - Bedienungshilfe wird ausgegeben \n"
-					+ "berechne <zahl> - berechnet fibonacci fuer <zahl> \n"
+					+ "login <username> : einloggen des Benutzers mit dem Namen <username> \n"
+					+ "logout: Beenden und abmelden \n"
+					+ "who: Liste mit verbundenen Benutzern \n"
+					+ "time: aktuelle Zeit \n"
+					+ "ls <Pfad>: Dateiliste von <Pfad> \n"
+					+ "chat <username> <message> : sendet Nachricht an < username > \n"
+					+ "notify <message>: benachrichtigt alle eingeloggten Benutzer. \n"
+					+ "note <text>: hinterlegt eine Notiz für alle Benutzer. \n"
+					+ "notes: alle Notizen werden angezeigt.\n"
 					+ "ende - beendet die Anwendung");
 
 	public static void main(String[] args) {
@@ -45,46 +60,24 @@ public class MailClient {
 			
 			System.out.println("Client can now take commands. ");
 			
+			final List<Integer> allSeqs= new ArrayList<Integer>();
+			allSeqs.add((int) Math.random()*10000)
+			
 			// reading from console
 			String input;
 			loop: while ((input = consoleInput.readLine()) != null) {
-				switch (input.split(" ")[0]) {
+				String[] inputWords = input.split(" ");
+				switch (inputWords[0]) {
 				case "hilfe":
 					System.out.println(help);
 					break;
 				case "ende":
 					System.out.println("Closing client");
 					break loop;
-				case "berechne":
-					String maybeNumber;
-					try {
-						maybeNumber = input.split(" ")[1];
-					} catch (ArrayIndexOutOfBoundsException e) {
-						System.out.println("command 'berechne' needs a number");
-						break;
-					}
-					// prints to and flushes out
-					out.println(maybeNumber);
-
-					String feedback;
-					int response = Integer.parseInt(in.readLine());
-					switch (response) {
-					case FEHLER_EINGABE:
-						feedback = "Fehlerhafte Eingabe";
-						break;
-					case FEHLER_ZAHLENBEREICH:
-						feedback = "Ungueltiger Zahlenbereich";
-						break;
-					default:
-						feedback = maybeNumber
-								+ ". number in Fibonacci's sequence: "
-								+ response;
-						break;
-					}
-					System.out.println(feedback);
-					break;
 				default:
-					System.out.println("command not supported");
+					int seq = allSeqs.get(allSeqs.size() - 1);
+					out.println(new Request(seq, inputWords[0], Arrays.copyOfRange(inputWords, 1, inputWords.length)));
+					
 					break;
 				}
 
