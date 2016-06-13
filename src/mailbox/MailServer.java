@@ -1,6 +1,5 @@
 package mailbox;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,20 +8,28 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
-public class MailServer {
+public class MailServer{
 
-    public static final int PORTNUMBER = 8090;
+	public static final int PORTNUMBER = 8090;
     public static final int MAX_USERS = 5;
-
-    public static PrintWriter out;
-    public static BufferedReader in;
-    public static List<User> users = new ArrayList<>();
-
+    
+    protected ServerSocket serverSocket;
+    
+    public MailServer(final int port){
+    	try {
+			this.serverSocket = new ServerSocket(port);
+		} catch (IOException e) {
+			this.serverSocket = null;
+			e.printStackTrace();
+		}
+    }
+        
     public static void main(String[] args) {
         // setting up the server
         try {
@@ -35,32 +42,24 @@ public class MailServer {
                 port = PORTNUMBER;
             }
 
-            @SuppressWarnings("resource")
-            final ServerSocket server = new ServerSocket(port);
-            Socket clientSocket = null;
-
-            boolean killClientFlag;
-
+            final MailServer mailServer = new MailServer(port);
+            final Collection<Socket> unregisteredClientSockets = new ArrayList<Socket>();
+            final Collection<Session> sessions = new ArrayList<MailServer.Session>();
             // setting up a connection
             connectionBuild: while (true) {
-                clientSocket = server.accept();
-                out = new PrintWriter(
-                        clientSocket.getOutputStream(), true);
-                in = new BufferedReader(
-                        new InputStreamReader(clientSocket.getInputStream()));
-
-                killClientFlag = false;
-
-                out.println(new Response(204,0,new String[]{"Connected to sever"}).json());
+            	final Socket client =  mailServer.serverSocket.accept();            	
+            	unregisteredClientSockets.add(client);
+                
+                mailServer.out.println(new Response(204,0,new String[]{"Connected to sever"}).json());
 
                 String userInput;
-                while ((userInput = in.readLine()) != null) {
+                while ((userInput = mailServer.in.readLine()) != null) {
                     try {
                         Gson gson = new Gson();
                         Request request = gson.fromJson(userInput, Request.class);
-                        out.println(handleRequest(request));
+                        mailServer.out.println(mailServer.handleRequest(request));
 
-                    } catch (Exception e) {
+                    } catch (JsonSyntaxException e) {
                         e.printStackTrace();
                     }
                 }
@@ -73,46 +72,59 @@ public class MailServer {
         System.out.println("server is kill");
     }
 
-    public static Response handleRequest(Request request){
+    public Response handleRequest(Request request){
         String command = request.getCommand();
-
+        final StatusAndData statusAndData;
         switch(command){
             case "login":
-
+            	statusAndData = login(request.getParams()[0]);
+            	break;
+            default:
+            	statusAndData = new StatusAndData(StatusCodes.SERVICEUNAVAILABLE, null);
+            	break;
         }
-        return null;
+        return new Response(statusAndData.getStatus(), request.getSequence(), statusAndData.getData());
     }
 
-    private static Response login(String username){
-        return null;
+    private StatusAndData login(String username){
+    	String welcome = "Welcome to the server";
+    	
+    	return new StatusAndData(1, new String[]{welcome});
     }
 
-    private class User{
-
+    private class Session{
         private String username;
-        private List<String> messages;
-        private Socket userSocket;
+        private Socket client;
 
-        public User(String username, Socket userSocket){
-            this.username = username;
-            this.userSocket = userSocket;
-            this.messages = new ArrayList<>();
+        private PrintWriter out;
+        private BufferedReader in;
+        
+        Session(final String username, final Socket client){
+        	super();
+        	this.username = username;
+        	this.client = client;
+        	try {
+				this.out = new PrintWriter(this.client.getOutputStream());
+				this.in = new BufferedReader(new InputStreamReader(this.client.getInputStream()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
-
-        public List<String> getMessages(){
-            return messages;
-        }
-
-        public void addMessage(String message){
-            this.messages.add(message);
-        }
-
-        public Socket getUserSocket() {
-            return userSocket;
-        }
-
-        public String getUsername() {
-            return username;
-        }
+    }
+    
+    private class StatusAndData{
+    	private final int status;
+    	private final String[] data;
+    	StatusAndData(int status, String[] data) {
+    		super();
+    		this.status = status;
+    		this.data = data;
+    	}
+    	public int getStatus(){
+    		return this.status;
+    	}
+    	public String[] getData(){
+    		return this.data;
+    	}
     }
 }
