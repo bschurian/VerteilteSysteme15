@@ -8,6 +8,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,7 +21,7 @@ public class MailServer {
 
     public static PrintWriter out;
     public static BufferedReader in;
-
+    public static List<User> users = new ArrayList<>();
 
     public static void main(String[] args) {
         // setting up the server
@@ -46,7 +48,6 @@ public class MailServer {
                         clientSocket.getOutputStream(), true);
                 in = new BufferedReader(
                         new InputStreamReader(clientSocket.getInputStream()));
-
 
                 killClientFlag = false;
 
@@ -83,12 +84,35 @@ public class MailServer {
     }
 
     private static Response login(String username){
-
+        return null;
     }
 
     private class User{
 
         private String username;
+        private List<String> messages;
+        private Socket userSocket;
 
+        public User(String username, Socket userSocket){
+            this.username = username;
+            this.userSocket = userSocket;
+            this.messages = new ArrayList<>();
+        }
+
+        public List<String> getMessages(){
+            return messages;
+        }
+
+        public void addMessage(String message){
+            this.messages.add(message);
+        }
+
+        public Socket getUserSocket() {
+            return userSocket;
+        }
+
+        public String getUsername() {
+            return username;
+        }
     }
 }
