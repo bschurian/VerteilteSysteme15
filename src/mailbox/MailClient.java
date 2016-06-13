@@ -1,11 +1,14 @@
 package mailbox;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 public class MailClient {
@@ -42,58 +45,27 @@ public class MailClient {
 					client.getInputStream()));
 			final BufferedReader consoleInput = new BufferedReader(
 					new InputStreamReader(System.in));
-			
+
 			System.out.println("Client can now take commands. ");
-			
+
 			// reading from console
 			String input;
-			loop: while ((input = consoleInput.readLine()) != null) {
+			loop:
+			while ((input = consoleInput.readLine()) != null) {
 				switch (input.split(" ")[0]) {
-				case "hilfe":
-					System.out.println(help);
-					break;
-				case "ende":
-					System.out.println("Closing client");
-					break loop;
-				case "berechne":
-					String maybeNumber;
-					try {
-						maybeNumber = input.split(" ")[1];
-					} catch (ArrayIndexOutOfBoundsException e) {
-						System.out.println("command 'berechne' needs a number");
-						break;
-					}
-					// prints to and flushes out
-					out.println(maybeNumber);
 
-					String feedback;
-					int response = Integer.parseInt(in.readLine());
-					switch (response) {
-					case FEHLER_EINGABE:
-						feedback = "Fehlerhafte Eingabe";
-						break;
-					case FEHLER_ZAHLENBEREICH:
-						feedback = "Ungueltiger Zahlenbereich";
-						break;
-					default:
-						feedback = maybeNumber
-								+ ". number in Fibonacci's sequence: "
-								+ response;
-						break;
-					}
-					System.out.println(feedback);
-					break;
-				default:
-					System.out.println("command not supported");
-					break;
+
 				}
 
+				client.close();
+
 			}
-
-			client.close();
-
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+
 	}
 }

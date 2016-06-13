@@ -14,6 +14,17 @@ public class Request{
         this.params = params;
     }
 
+    public int getSequence() {
+        return sequence;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public String[] getParams() {
+        return params;
+    }
 
     public String json(){
         Gson gson = new Gson();

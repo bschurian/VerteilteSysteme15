@@ -52,24 +52,10 @@ public class MailServer {
                 String userInput;
                 while ((userInput = in.readLine()) != null) {
                     try {
-//                        int result;
-//                        try {
-//                            final int number = Integer.parseInt(userInput);
-//                            result = 25;
-//                        } catch (NumberFormatException nfe) {
-//                            result = FEHLER_EINGABE;
-//                            killClientFlag = true;//uncomment so server is very unforgiving
-//                        } catch (IllegalArgumentException iaE) {
-//                            result = FEHLER_ZAHLENBEREICH;
-//                            killClientFlag = true;//uncomment so server is unforgiving
-//                        }
-//                        // prints to and flushes out
-//                        out.println(result);
-//                        //killing(closing) of client happens here if he has incurred our wrath
-//                        if(killClientFlag){
-//                            clientSocket.close();
-//                            continue connectionBuild;
-//                        }
+                        Gson gson = new Gson();
+                        Request request = gson.fromJson(userInput, Request.class);
+
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -81,6 +67,16 @@ public class MailServer {
             e.printStackTrace();
         }
         System.out.println("server is kill");
+    }
+
+    public static Response handleRequest(Request request){
+        String command = request.getCommand();
+
+        switch(command){
+            case "login":
+
+        }
+        return null;
     }
 
     private class User{
