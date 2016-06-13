@@ -29,7 +29,7 @@ public class MailClient {
 					+ "ls <Pfad>: Dateiliste von <Pfad> \n"
 					+ "chat <username> <message> : sendet Nachricht an < username > \n"
 					+ "notify <message>: benachrichtigt alle eingeloggten Benutzer. \n"
-					+ "note <text>: hinterlegt eine Notiz für alle Benutzer. \n"
+					+ "note <text>: hinterlegt eine Notiz fï¿½r alle Benutzer. \n"
 					+ "notes: alle Notizen werden angezeigt.\n"
 					+ "ende - beendet die Anwendung");
 
@@ -61,7 +61,7 @@ public class MailClient {
 			System.out.println("Client can now take commands. ");
 			
 			final List<Integer> allSeqs= new ArrayList<Integer>();
-			allSeqs.add((int) Math.random()*10000)
+			allSeqs.add((int) Math.random()*10000);
 			
 			// reading from console
 			String input;

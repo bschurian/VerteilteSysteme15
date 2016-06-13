@@ -47,14 +47,17 @@ public class MailServer {
                 in = new BufferedReader(
                         new InputStreamReader(clientSocket.getInputStream()));
 
+
                 killClientFlag = false;
+
+                out.println(new Response(204,0,new String[]{"Connected to sever"}).json());
 
                 String userInput;
                 while ((userInput = in.readLine()) != null) {
                     try {
                         Gson gson = new Gson();
                         Request request = gson.fromJson(userInput, Request.class);
-
+                        out.println(handleRequest(request));
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -77,6 +80,10 @@ public class MailServer {
 
         }
         return null;
+    }
+
+    private static Response login(String username){
+
     }
 
     private class User{
