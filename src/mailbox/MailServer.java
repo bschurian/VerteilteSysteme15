@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,6 +19,9 @@ public class MailServer{
 
 	public static final int PORTNUMBER = 8090;
     public static final int MAX_USERS = 5;
+
+    public Collection<Socket> unregisteredClientSockets;
+    public Collection<Session> clients;
     
     protected ServerSocket serverSocket;
     
@@ -28,6 +32,8 @@ public class MailServer{
 			this.serverSocket = null;
 			e.printStackTrace();
 		}
+        unregisteredClientSockets = new ArrayList<>();
+        clients = new ArrayList<>();
     }
         
     public static void main(String[] args) {
@@ -43,12 +49,13 @@ public class MailServer{
             }
 
             final MailServer mailServer = new MailServer(port);
-            final Collection<Socket> unregisteredClientSockets = new ArrayList<Socket>();
-            final Collection<Session> sessions = new ArrayList<MailServer.Session>();
+//            final Collection<Socket> unregisteredClientSockets = new ArrayList<Socket>();
+//            final Collection<Session> sessions = new ArrayList<MailServer.Session>();
+
             // setting up a connection
             connectionBuild: while (true) {
             	final Socket client =  mailServer.serverSocket.accept();            	
-            	unregisteredClientSockets.add(client);
+            	mailServer.unregisteredClientSockets.add(client);
                 
                 mailServer.out.println(new Response(204,0,new String[]{"Connected to sever"}).json());
 
