@@ -9,12 +9,16 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 public class MailServer {
-
+	
+	private MailServer mailServer;
+	
 	public static final int PORTNUMBER = 8090;
 	public static final int MAX_USERS = 5;
 
@@ -32,6 +36,7 @@ public class MailServer {
 		}
 		unregisteredClientSockets = new ArrayList<>();
 		clients = new ArrayList<>();
+		this.mailServer = this;
 	}
 
 	public static void main(String[] args) {
@@ -118,9 +123,7 @@ public class MailServer {
 		return new StatusAndData(1, new String[] { welcome });
 	}
 
-	private class RegisteredSession {
-		private final MailServer mailServer;
-		
+	private class RegisteredSession {		
 		private final String username;
 		
 		private final Socket client;
@@ -131,7 +134,6 @@ public class MailServer {
 		
 		public RegisteredSession(final MailServer mailServer,
 				final String username, final Socket client) throws IOException {
-			this.mailServer = mailServer;
 			this.username = username;
 			this.client = client;
 			this.out = new PrintWriter(this.client.getOutputStream());
@@ -184,7 +186,7 @@ public class MailServer {
 		private final int status;
 		private final String[] data;
 
-		StatusAndData(int status, String[] data) {
+		public StatusAndData(int status, String[] data) {
 			super();
 			this.status = status;
 			this.data = data;
@@ -197,5 +199,30 @@ public class MailServer {
 		public String[] getData() {
 			return this.data;
 		}
+	}
+	
+	private interface Befehl {
+		public StatusAndData anwenden(final String[] params);
+	}
+	
+	private class BefehlFactory{
+		private final Map<String, Befehl> befehle;
+		private BefehlFactory() {
+			this.befehle = new HashMap<String, MailServer.Befehl>();
+		}
+		public void addBefehl(final String name, final Befehl befehl) {
+			this.befehle.put(name, befehl);
+		}
+		public void executeBefehl(final String name, String[] params) {
+			if(this.befehle.containsKey(name)){
+				this.befehle.get(name).anwenden(params);
+			}
+		}
+		public BefehlFactory init() {
+			final BefehlFactory befehlFactory = new BefehlFactory();
+			befehlFactory.addBefehl("login", (params) -> mailServer.login(params[0]));
+			return befehlFactory;
+		}
+		
 	}
 }
