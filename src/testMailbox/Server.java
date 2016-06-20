@@ -168,6 +168,22 @@ public class Server {
                 info = ls.execute(request.getParams(), client);
                 break;
 
+            case "time":
+                Command time = new Command() {
+
+                    @Override
+                    public StatusAndData execute(String[] para, Socket client) {
+                        StatusAndData information;
+                        if (!checkLoggedIn(client)) {
+                            information = new StatusAndData(StatusCodes.NICHTEINGELOGGT, new String[]{"You are not logged in."});
+                            return information;
+                        }
+                        return new StatusAndData(StatusCodes.OKMITANTWORT, new String[]{java.time.LocalDateTime.now().toString()});
+                    }
+                };
+                info = time.execute(request.getParams(), client);
+                break;
+
             case "chat":
                 Command chat = new Command() {
 
@@ -204,7 +220,7 @@ public class Server {
                 Command notify = new Command(){
 
                     @Override
-                    public StatusAndData execute(String[] para, Socket client) {
+                    public StatusAndData execute(String[] para, Socket client){
                         StatusAndData information;
                         if(!checkLoggedIn(client)){
                             information = new StatusAndData(StatusCodes.NICHTEINGELOGGT, new String[]{"You are not logged in."});
@@ -260,6 +276,9 @@ public class Server {
                     }
                 };
                 info = notes.execute(request.getParams(), client);
+                break;
+            default:
+                info = new StatusAndData(StatusCodes.NOTIMPLEMENTED, new String[]{"Command not supported"});
 
         }
         return new Response(info.getStatus(), request.getSequence(), info.getData());
