@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class Server {
 
-    private Server server;
+    private static Server server;
     private final int MAXUSERS = 5;
     private final int PORTNUMBER = 8090;
     private List<Note> notes;
@@ -31,7 +31,6 @@ public class Server {
         notes = new ArrayList<>();
         users = new ArrayList<>();
         this.notesDuration = 60;
-        this.server = this;
     }
 
     public Server getServer() {
@@ -227,8 +226,7 @@ public class Server {
                             return information;
                         }
                         String message = "";
-
-                        for(int i = 0; i < para.length; i++){
+                        for(int i = 1; i < para.length; i++){
                             message += para[i] + " ";
                         }
                         for(User user : server.getUsers()){
@@ -316,34 +314,56 @@ public class Server {
 
 
 
-    public static void main(String[] args) {
-        Server server = new Server();
-        server.cullNotes();
+	public static void main(String[] args) {
+		server = new Server();
+		server.cullNotes();
+		
+		(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				final List<Thread> threads = new ArrayList<Thread>();
+				while (true) {
+					System.out.println("ConnBuild");
+					final Thread thread = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								final Socket client = server.getServerSocket().accept();
+								PrintWriter out = new PrintWriter(client
+										.getOutputStream(), true);
+								BufferedReader reader = new BufferedReader(
+										new InputStreamReader(client.getInputStream()));
+								
+								String userInput;
+								while (true) {
+									if((userInput = reader.readLine()) != null){
+										System.out.println("readL done");
+										try {
+											Gson gson = new Gson();
+											Request request = gson.fromJson(userInput,
+													Request.class);
+											Response response = server.handleRequest(
+													request, client);
+											out.println(response.json());
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
+									}
+								}
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					});				
+					System.out.println("aaaaaaaah");
+					thread.run();
+					System.out.println("bbbbaaaah");
+					threads.add(thread);
+				}
+			}
+		})).run();
 
-        connectionBuild: while (true) {
-            try {
-                final Socket client = server.getServerSocket().accept();
-                PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-
-                String userInput;
-                // calculation and sending of fib(n)
-                while ((userInput = new BufferedReader(new InputStreamReader(client.getInputStream())).readLine()) != null) {
-                    try {
-                        Gson gson = new Gson();
-                        Request request = gson.fromJson(userInput, Request.class);
-                        Response response = server.handleRequest(request, client);
-                        out.println(response.json());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-    }
+	}
 
 
 
@@ -375,7 +395,7 @@ public class Server {
             this.username = username;
             this.clientSocket = clientSocket;
             try {
-                this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
+                this.out = new PrintWriter(this.clientSocket.getOutputStream());
                 this.in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
             } catch (IOException e) {
                 e.printStackTrace();
