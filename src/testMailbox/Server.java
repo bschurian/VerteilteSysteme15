@@ -227,7 +227,8 @@ public class Server {
                             return information;
                         }
                         String message = "";
-                        for(int i = 1; i < para.length; i++){
+
+                        for(int i = 0; i < para.length; i++){
                             message += para[i] + " ";
                         }
                         for(User user : server.getUsers()){
@@ -340,7 +341,6 @@ public class Server {
                 e.printStackTrace();
             }
 
-
         }
 
     }
@@ -375,7 +375,7 @@ public class Server {
             this.username = username;
             this.clientSocket = clientSocket;
             try {
-                this.out = new PrintWriter(this.clientSocket.getOutputStream());
+                this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
                 this.in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
             } catch (IOException e) {
                 e.printStackTrace();

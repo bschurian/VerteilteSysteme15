@@ -1,6 +1,7 @@
 package testMailbox;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import mailbox.*;
 
 import java.io.BufferedReader;
@@ -104,14 +105,19 @@ public class Client {
                     try {
                         String input = client.getIn().readLine();
                         if(input != null){
-                            Response response = new Gson().fromJson(input, Response.class);
-                            if(response != null){
-                                if(response.getStatus() != StatusCodes.OKOHNEANTWORT){
-                                    System.out.println(response.getSequence() + " " + response.getStatus() + " " + Arrays.toString(response.getData()));
+                            try{
+                                Response response = new Gson().fromJson(input, Response.class);
+                                if(response != null){
+                                    if(response.getStatus() != StatusCodes.OKOHNEANTWORT){
+                                        System.out.println(response.getSequence() + " " + response.getStatus() + " " + Arrays.toString(response.getData()));
+                                    }
+                                } else {
+                                    System.out.println(input);
                                 }
-                            } else {
+                            } catch(IllegalStateException | JsonSyntaxException e){
                                 System.out.println(input);
                             }
+
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
