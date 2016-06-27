@@ -1,6 +1,7 @@
 package testMailbox;
 
 import com.google.gson.Gson;
+import com.sun.xml.internal.bind.v2.model.annotation.RuntimeAnnotationReader;
 import com.sun.xml.internal.ws.api.message.Packet;
 
 import java.io.*;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class Server {
 
-    private static Server server;
+    private Server server;
     private final int MAXUSERS = 5;
     private final int PORTNUMBER = 8090;
     private List<Note> notes;
@@ -31,6 +32,7 @@ public class Server {
         notes = new ArrayList<>();
         users = new ArrayList<>();
         this.notesDuration = 60;
+        this.server = this;
     }
 
     public Server getServer() {
@@ -202,9 +204,17 @@ public class Server {
                         for(User user : server.getUsers()){
                             if(user.getUsername().equals(para[0])){
                                 contact = user;
+                                break;
                             }
                         }
-                        String message = "";
+                        User sender = null;
+                        for(User user : server.getUsers()){
+                            if(user.getClientSocket().equals(client)){
+                                sender = user;
+                                break;
+                            }
+                        }
+                        String message = sender.getUsername() + ": ";
                         for(int i = 1; i < para.length; i++){
                             message += para[i] + " ";
                         }
@@ -225,8 +235,16 @@ public class Server {
                             information = new StatusAndData(StatusCodes.NICHTEINGELOGGT, new String[]{"You are not logged in."});
                             return information;
                         }
-                        String message = "";
-                        for(int i = 1; i < para.length; i++){
+                        User sender = null;
+                        for(User user : server.getUsers()){
+                            if(user.getClientSocket().equals(client)){
+                                sender = user;
+                                break;
+                            }
+                        }
+                        String message = sender.getUsername() + ": ";
+
+                        for(int i = 0; i < para.length; i++){
                             message += para[i] + " ";
                         }
                         for(User user : server.getUsers()){
@@ -247,7 +265,14 @@ public class Server {
                             information = new StatusAndData(StatusCodes.NICHTEINGELOGGT, new String[]{"You are not logged in."});
                             return information;
                         }
-                        String message = "";
+                        User sender = null;
+                        for(User user : server.getUsers()){
+                            if(user.getClientSocket().equals(client)){
+                                sender = user;
+                                break;
+                            }
+                        }
+                        String message = sender.getUsername() + ": ";
                         for(int i = 0; i < para.length; i++){
                             message += para[i] + " ";
                         }
@@ -311,60 +336,22 @@ public class Server {
         });
     }
 
+    public static void main(String[] args){
+        Server server = new Server();
+        server.cullNotes();
 
+        while(true){
+            try{
+                final Socket client = server.getServerSocket().accept();
+                ClientThread clientThread = new ClientThread(server, client);
+                new Thread(clientThread).start();
 
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-	public static void main(String[] args) {
-		server = new Server();
-		server.cullNotes();
-		
-		(new Thread(new Runnable() {
-			@Override
-			public void run() {
-				final List<Thread> threads = new ArrayList<Thread>();
-				while (true) {
-					System.out.println("ConnBuild");
-					final Thread thread = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								final Socket client = server.getServerSocket().accept();
-								PrintWriter out = new PrintWriter(client
-										.getOutputStream(), true);
-								BufferedReader reader = new BufferedReader(
-										new InputStreamReader(client.getInputStream()));
-								
-								String userInput;
-								while (true) {
-									if((userInput = reader.readLine()) != null){
-										System.out.println("readL done");
-										try {
-											Gson gson = new Gson();
-											Request request = gson.fromJson(userInput,
-													Request.class);
-											Response response = server.handleRequest(
-													request, client);
-											out.println(response.json());
-										} catch (Exception e) {
-											e.printStackTrace();
-										}
-									}
-								}
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					});				
-					System.out.println("aaaaaaaah");
-					thread.run();
-					System.out.println("bbbbaaaah");
-					threads.add(thread);
-				}
-			}
-		})).run();
-
-	}
-
+    }
 
 
     private class Note{
@@ -395,7 +382,7 @@ public class Server {
             this.username = username;
             this.clientSocket = clientSocket;
             try {
-                this.out = new PrintWriter(this.clientSocket.getOutputStream());
+                this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
                 this.in = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
             } catch (IOException e) {
                 e.printStackTrace();
